@@ -12,6 +12,7 @@ describe('javascript-data-types/sort-strings', () => {
 
     expect(arr === sorted).toBeFalsy();
     expect(arr).toEqual(arrCopy);
+
   });
 
   it('should return sorted by "desc" array of strings in "en" locale', () => {
