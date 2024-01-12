@@ -10,7 +10,7 @@ export function sortStrings(arr, param = 'asc') {
   if (param === 'desc') {
     return sortArr.reverse();
   } else if (param === 'asc') {
-    sortArr.sort((a, b) => a.localeCompare(b, 'en-US', {caseFirst: 'upper'}));
+    sortArr.sort((a, b) => a.localeCompare(b, ['ru', 'en'], {caseFirst: 'upper'}));
     return sortArr;
   }
 }
