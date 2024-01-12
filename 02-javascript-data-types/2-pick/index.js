@@ -6,7 +6,7 @@
  */
 export const pick = (obj, ...fields) => {
   for (const objKey in obj) {
-    if (!(fields.includes(objKey))){
+    if (!(fields.includes(objKey))) {
       delete obj[objKey];
     }
   }
