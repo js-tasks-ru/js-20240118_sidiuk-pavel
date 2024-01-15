@@ -6,7 +6,6 @@
  */
 export function sortStrings(arr, param = 'asc') {
   let sortArr = arr.concat([]);
-  //sortArr.sort((a, b) => a.localeCompare(b));
   if (param === 'desc') {
     return sortArr.sort((a, b) => b.localeCompare(a, ['ru', 'en-US'], {caseFirst: 'upper'}));
   } else if (param === 'asc') {
