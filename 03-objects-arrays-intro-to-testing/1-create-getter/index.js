@@ -5,7 +5,7 @@
  */
 export function createGetter(path) {
   let arr = path.split('.');
-  let a = undefined;
+  let a;
   let b = arr[arr.length - 1]
   return function getter(obj) {
     for (const aKey in obj) {
