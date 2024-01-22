@@ -17,13 +17,13 @@
 
 export function sortStrings(arr, param = 'asc') {
   const sortArr = arr.concat([]);
-  return sortArr.sort(param === 'desc' ? sortDesc() : sortAsc());
+  return sortArr.sort(param === 'desc' ? sortDesc : sortAsc);
 }
 
-function sortDesc() {
-  return ((a, b) => b.localeCompare(a, ['ru', 'en-US'], {caseFirst: 'upper'}));
+function sortDesc(a, b) {
+  return b.localeCompare(a, ['ru', 'en-US'], {caseFirst: 'upper'});
 }
 
-function sortAsc() {
-  return ((a, b) => a.localeCompare(b, ['ru', 'en-US'], {caseFirst: 'upper'}));
+function sortAsc(a, b) {
+  return a.localeCompare(b, ['ru', 'en-US'], {caseFirst: 'upper'});
 }
