@@ -5,7 +5,6 @@
  */
 
 export function uniq(arr) {
-  let set = new Set(arr);
-  return Array.from(set);
+  return Array.from(new Set(arr));
 }
-// Супер, отдельное спасибо за этот совет. Действительно намного короче запись
+
