@@ -5,6 +5,7 @@
  */
 
 export function invertObj(obj) {
+  const invert = {};
   let val;
   if (obj === undefined) {
     return undefined;
@@ -12,7 +13,7 @@ export function invertObj(obj) {
   for (const objKey in obj) {
     val = obj[objKey];
     delete obj[objKey];
-    Object.assign(obj, {[`${val}`]: objKey});
+    Object.assign(invert, {[`${val}`]: objKey});
   }
-  return obj;
+  return invert;
 }

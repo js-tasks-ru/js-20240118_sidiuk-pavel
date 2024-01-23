@@ -4,11 +4,12 @@
  * @param {...string} fields - the properties paths to pick
  * @returns {object} - returns the new object
  */
+
 export const pick = (obj, ...fields) => {
-  const pickObj = obj;
-  for (const objKey in pickObj) {
-    if (!(fields.includes(objKey))) {
-      delete pickObj[objKey];
+  const pickObj = {};
+  for (const objKey in obj) {
+    if (fields.includes(objKey)) {
+      pickObj[objKey] = obj[objKey];
     }
   }
   return pickObj;
