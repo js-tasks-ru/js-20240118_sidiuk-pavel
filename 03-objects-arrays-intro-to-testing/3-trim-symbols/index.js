@@ -7,15 +7,15 @@
 
 // не помню какой знак для строгой проверки, проверьте по полной программе, хочу что бы код был по возможности короче
 export function trimSymbols(string, size) {
+  if (size === 0) {
+    return '';
+  }
+  if (size === undefined) {
+    return string;
+  }
   let counter = 0;
   let currentLetter = '';
   let newStr = '';
-  if (size === 0) {
-    return newStr;
-  }
-  if (size === undefined) {
-    return newStr = string;
-  }
   for (const strElement of string) {
     if (currentLetter === '') {
       currentLetter = strElement;
