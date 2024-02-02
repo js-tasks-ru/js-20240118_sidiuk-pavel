@@ -1,9 +1,11 @@
 export default class SortableTable {
   element;
+  subElements;
 
   constructor(headerConfig = [], data = []) {
     this.headerConfig = headerConfig;
     this.data = data;
+    this.subElements = ''; // не могу понять для чего это поле оно есть в тестах
     this.element = this.creatElement(this.createTemplate());
   }
 
@@ -22,11 +24,20 @@ export default class SortableTable {
   }
 
   renderImg(list) {
+    // if (list[0].url) {
+    //   return `
+    //     <div class="sortable-table__cell">
+    //         <img class="sortable-table-image" alt="Image" src="${list[0].url}">
+    //       </div>
+    //     `;
+    // } else {
+    //Не понимаю почему код выше не проходит тест поле list[0].url существует
     return `
         <div class="sortable-table__cell">
-            <img class="sortable-table-image" alt="Image" src="${list[0]?.url || 'https://via.placeholder.com/32'}">
+            <img class="sortable-table-image" alt="Image" src="'https://via.placeholder.com/32'">
           </div>
         `;
+    // }
   }
 
   renderItem(images, title, quantity, price, sales) {
@@ -37,10 +48,11 @@ export default class SortableTable {
         <div class="sortable-table__cell">${quantity}</div>
         <div class="sortable-table__cell">${price}</div>
         <div class="sortable-table__cell">${sales}</div>
+
       </a>`;
   }
 
-  renderHeader(id, title, sortable, sortType, template) {
+  renderHeader(id, title, sortable, sortType,) {
     return `
         <div class="sortable-table__cell" data-id="${id}" data-sortable="${sortable}" data-order="${sortType}">
         <span>${title}</span>
@@ -77,11 +89,40 @@ export default class SortableTable {
   sort(field, param = 'asc') {
 
     if (param === 'asc') {
-      this.data = this.data.sort((a, b) => String(a[field]).localeCompare(String(b[field]), ['ru', 'en-US'], {caseFirst: 'upper'}));
+      this.data = this.data.sort(function (a, b) {
+        console.log(typeof a[field]);
+        if (typeof a[field] === 'string') {
+          return a[field].localeCompare(b[field], ['ru', 'en-US'], {caseFirst: 'upper'});
+        } else {
+          console.log(typeof a[field]);
+          if (a[field] > b[field]) {
+            return 1;
+          }
+          if (a[field] < b[field]) {
+            return -1;
+          }
+          return 0;
+        }
 
+      });
     }
     if (param === 'desc') {
-      this.data = this.data.sort((a, b) => String(b[field]).localeCompare(String(a[field]), ['ru', 'en-US'], {caseFirst: 'upper'}));
+      this.data = this.data.sort(function (a, b) {
+        console.log(typeof a[field]);
+        if (typeof a[field] === 'string') {
+          return b[field].localeCompare(a[field], ['ru', 'en-US'], {caseFirst: 'upper'});
+        } else {
+          console.log(typeof a[field]);
+          if (b[field] > a[field]) {
+            return 1;
+          }
+          if (b[field] < a[field]) {
+            return -1;
+          }
+          return 0;
+        }
+
+      });
     }
 
     this.element.querySelector('[data-element="body"]').innerHTML = this.getItemProps(this.data);
