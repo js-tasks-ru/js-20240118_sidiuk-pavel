@@ -5,120 +5,91 @@ export default class SortableTable {
   constructor(headerConfig = [], data = []) {
     this.headerConfig = headerConfig;
     this.data = data;
-    this.element = this.creatElement(this.createTemplate());
+    this.element = this.createElement(this.createTemplate());
     this.subElements = {
       body: this.element.querySelector('[data-element="body"]')
     };
-
   }
 
-  creatElement(template) {
+  createElement(template) {
     const element = document.createElement('div');
     element.innerHTML = template;
     return element.firstElementChild;
   }
 
-
-  getHeaderProps(list) {
-    return list.map(item => this.renderHeader(item)).join('');
-  }
-
-  getItemProps(list) {
-    return list.map(item => this.renderItem(item)).join('');
-  }
-
-  renderImg(list) {
+  createTemplate() {
     return (`
-        <div class="sortable-table__cell">
-            <img class="sortable-table-image" alt="Image" src="https://via.placeholder.com/32">
+      <div data-element="productsContainer" class="products-list__container">
+        <div class="sortable-table">
+          <div data-element="header" class="sortable-table__header sortable-table__row">
+              ${this.createHeaderTemplate(this.headerConfig)}
           </div>
-        `);
-
+          <div data-element="body" class="sortable-table__body">
+              ${this.createBodyTemplate(this.headerConfig, this.data)}
+          </div>
+          <div data-element="loading" class="loading-line sortable-table__loading-line"></div>
+          <div data-element="emptyPlaceholder" class="sortable-table__empty-placeholder">
+            <div>
+              <p>No products satisfies your filter criteria</p>
+              <button type="button" class="button-primary-outline">Reset all filters</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `);
   }
 
-  renderItem(item) {
-
-
-    return `
-       <a href="/products/3d-ochki-epson-elpgs03" class="sortable-table__row">
-        ${this.renderImg(item.images)}
-        <div class="sortable-table__cell">${item.title}</div>
-        <div class="sortable-table__cell">${item.quantity}</div>
-        <div class="sortable-table__cell">${item.price}</div>
-        <div class="sortable-table__cell">${item.sales}</div>
-      </a>`;
+  createHeaderTemplate(headerConfig) {
+    return headerConfig.map(config => this.createHeaderCellTemplate(config)).join('');
   }
 
-  renderHeader(item) {
-
+  createHeaderCellTemplate(config) {
     return `
-        <div class="sortable-table__cell" data-id="${item.id}" data-sortable="${item.sortable}" data-order="${item.sortType}">
-        <span>${item.title}</span>
-        <span data-element="arrow" class="sortable-table__sort-arrow">
-          <span class="sort-arrow"></span>
-        </span>
+      <div class="sortable-table__cell" data-id="${config.id}" data-sortable="${config.sortable}" data-order="${config.sortType}">
+        <span>${config.title}</span>
       </div>`;
   }
 
-  createTemplate() {
-    return (`
-<div data-element="productsContainer" class="products-list__container">
-  <div class="sortable-table">
-     <div data-element="header" class="sortable-table__header sortable-table__row">
-        ${this.getHeaderProps(this.headerConfig)}
-    </div>
-    <div data-element="body" class="sortable-table__body">
-        ${this.getItemProps(this.data)}
-    </div>
-    <div data-element="loading" class="loading-line sortable-table__loading-line"></div>
-    <div data-element="emptyPlaceholder" class="sortable-table__empty-placeholder">
-      <div>
-        <p>No products satisfies your filter criteria</p>
-        <button type="button" class="button-primary-outline">Reset all filters</button>
-      </div>
-    </div>
-  </div>
-</div>
-`);
-
+  createBodyTemplate(headerConfig, dataItems) {
+    return dataItems.map(item => this.createRowTemplate(headerConfig, item)).join('');
   }
 
+  createRowTemplate(headerConfig, item) {
+    return `
+       <a href="/products/3d-ochki-epson-elpgs03" class="sortable-table__row">
+       ${headerConfig.map(config => this.createRowCellTemplate(config, item)).join('')}
+      </a>`;
+  }
 
-  sort(field, param) {
-    if (param === 'asc') {
-      this.data = this.data.sort(function (a, b) {
-        if (typeof a[field] === 'string') {
-          return a[field].localeCompare(b[field], ['ru', 'en-US'], {caseFirst: 'upper'});
-        } else {
-          if (a[field] > b[field]) {
-            return 1;
-          }
-          if (a[field] < b[field]) {
-            return -1;
-          }
-          return 0;
-        }
-
-      });
-    }
-    if (param === 'desc') {
-      this.data = this.data.sort(function (a, b) {
-        if (typeof a[field] === 'string') {
-          return b[field].localeCompare(a[field], ['ru', 'en-US'], {caseFirst: 'upper'});
-        } else {
-          if (b[field] > a[field]) {
-            return 1;
-          }
-          if (b[field] < a[field]) {
-            return -1;
-          }
-          return 0;
-        }
-      });
+  createRowCellTemplate(config, item) {
+    if (config.template) {
+      return config.template(item); // @TODO: посмотреть что принимает на вход
     }
 
-    this.subElements.body.innerHTML = this.getItemProps(this.data);
+    const fieldName = config['id'];
+    const fieldValue = item[fieldName];
 
+    return `<div class="sortable-table__cell">${fieldValue}</div>`;
+  }
+
+  sort(fieldValue, orderValue = 'desc') {
+    const orders = {
+      'desc': 1,
+      'asc': -1,
+    };
+
+    const sortedData = [...this.data].sort((itemA, itemB) => {
+      const k = orders[orderValue];
+      const valueA = itemA[fieldValue];
+      const valueB = itemB[fieldValue];
+      if (typeof valueA === 'string') {
+        return k * valueB.localeCompare(valueA, 'ru-en', {caseFirst: 'upper'});
+      }
+
+      return k * (valueB - valueA);
+    });
+
+    this.subElements.body.innerHTML = this.createBodyTemplate(this.headerConfig, sortedData);
   }
 
   remove() {
