@@ -63,7 +63,7 @@ export default class SortableTable {
 
   createRowCellTemplate(config, item) {
     if (config.template) {
-      return config.template(item); // @TODO: посмотреть что принимает на вход
+      return config.template(item);
     }
 
     const fieldName = config['id'];
