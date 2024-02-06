@@ -61,7 +61,6 @@ export default class SortableTable {
   }
 
   createTemplate() {
-    console.log(this.headerConfig)
     return (`
 <div data-element="productsContainer" class="products-list__container">
   <div class="sortable-table">
