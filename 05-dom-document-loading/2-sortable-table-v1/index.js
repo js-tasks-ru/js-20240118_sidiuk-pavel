@@ -45,7 +45,7 @@ export default class SortableTable {
 
   createHeaderCellTemplate(config) {
     return `
-      <div class="sortable-table__cell" data-id="${config.id}" data-sortable="${config.sortable}" data-order="${config.sortType}">
+      <div class="sortable-table__cell" data-id="${config.id}" data-sortable="">
         <span>${config.title}</span>
       </div>`;
   }
@@ -72,7 +72,7 @@ export default class SortableTable {
     return `<div class="sortable-table__cell">${fieldValue}</div>`;
   }
 
-  sort(fieldValue, orderValue = 'desc') {
+  sort(fieldValue = 'title', orderValue = 'desc') {
     const orders = {
       'desc': 1,
       'asc': -1,
