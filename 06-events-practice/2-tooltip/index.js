@@ -1,35 +1,21 @@
 class Tooltip {
   element;
-  static lastTooltipElement;
+
+  static OFFSET_TOP = 10;
+  static OFFSET_LEFT = 10;
+
+  static instance;
+
+  constructor() {
+    if (Tooltip.instance) {
+      return Tooltip.instance;
+    }
+    Tooltip.instance = this;
+  }
 
   initialize() {
-
-    this.body = document.querySelector('body');
     this.element = this.createElement(this.createTemplate());
     this.createEventListeners();
-    if (Tooltip.lastTooltipElement) {
-      Tooltip.lastTooltipElement.destroy();
-    }
-    Tooltip.lastTooltipElement = this;
-
-  }
-
-  createEventListeners() {
-    this.body.addEventListener('pointerover', this.pointeroverEvent);
-  }
-  destroyEventListeners() {
-    this.body.removeEventListener('pointerover', this.pointeroverEvent);
-  }
-  pointeroverEvent = () => {
-    this.body.addEventListener('pointerover', (event) =>{
-      if (event.target.dataset.tooltip) {
-        this.element.innerText = event.target.dataset.tooltip;
-        this.element.style.top = `${event.clientY}px`;
-        this.element.style.left = `${event.clientX}px`;
-        this.render();
-      }
-    });
-
   }
 
   createElement(template) {
@@ -42,12 +28,34 @@ class Tooltip {
     return `<div class="tooltip"></div>`;
   }
 
-  render() {
+  createEventListeners() {
+    document.addEventListener('pointerover', this.handleDocumentPointerover);
+    document.addEventListener('pointerout', this.handleDocumentPointerout);
+  }
 
+  destroyEventListeners() {
+    document.removeEventListener('pointerover', this.handleDocumentPointerover);
+    document.addEventListener('pointerout', this.handleDocumentPointerout);
+  }
 
+  handleDocumentPointerover = (event) => {
+    if (event.target.dataset.tooltip) {
+      this.element.style.top = `${event.clientY + Tooltip.OFFSET_TOP}px`;
+      this.element.style.left = `${event.clientX + Tooltip.OFFSET_LEFT}px`;
+      this.render(event.target.dataset.tooltip);
+    }
+  }
 
-    this.body.appendChild(this.element);
+  handleDocumentPointerout = (event) => {
+    if (event.target.dataset.tooltip) {
+      this.remove();
+    }
+  }
 
+  render(content) {
+    this.element.textContent = content;
+
+    document.body.appendChild(this.element);
   }
 
   remove() {
@@ -57,9 +65,7 @@ class Tooltip {
   destroy() {
     this.remove();
     this.destroyEventListeners();
-
   }
-
 }
 
 export default Tooltip;
