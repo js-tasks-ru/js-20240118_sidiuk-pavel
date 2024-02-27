@@ -1,4 +1,4 @@
-export default class SortableTable {
+export default class SortableTableV1 {
   element;
   subElements;
 
@@ -7,8 +7,10 @@ export default class SortableTable {
     this.data = data;
     this.element = this.createElement(this.createTemplate());
     this.subElements = {
-      body: this.element.querySelector('[data-element="body"]')
+      body: this.element.querySelector('[data-element="body"]'),
+      header: this.element.querySelector('[data-element="header"]')
     };
+
   }
 
   createElement(template) {
@@ -16,6 +18,7 @@ export default class SortableTable {
     element.innerHTML = template;
     return element.firstElementChild;
   }
+
 
   createTemplate() {
     return (`
@@ -45,8 +48,11 @@ export default class SortableTable {
 
   createHeaderCellTemplate(config) {
     return `
-      <div class="sortable-table__cell" data-id="${config.id}" data-sortable="">
+      <div class="sortable-table__cell" data-id="${config.id}" data-sortable="${config.sortable}" data-order="">
         <span>${config.title}</span>
+        <span data-element="arrow" class="sortable-table__sort-arrow">
+          <span class="sort-arrow"></span>
+        </span>
       </div>`;
   }
 
@@ -72,6 +78,7 @@ export default class SortableTable {
     return `<div class="sortable-table__cell">${fieldValue}</div>`;
   }
 
+
   sort(fieldValue = 'title', orderValue = 'desc') {
     const orders = {
       'desc': 1,
@@ -89,6 +96,8 @@ export default class SortableTable {
       return k * (valueB - valueA);
     });
 
+    let sortElem = document.querySelector(`[data-id = ${fieldValue}]`);
+    sortElem.dataset.order = orderValue;
     this.subElements.body.innerHTML = this.createBodyTemplate(this.headerConfig, sortedData);
   }
 
