@@ -20,22 +20,6 @@ export default class SortableTable extends SortableTableV1 {
   }
 
 
-  createHeaderCellTemplate(config) {
-    return `
-      <div class="sortable-table__cell" data-id="${config.id}" data-sortable="${config.sortable}">
-        <span>${config.title}</span>
-        ${this.createHeaderArrowTemplate()}
-      </div>`;
-  }
-
-  createHeaderArrowTemplate() {
-    return (`
-            <span data-element="arrow" class="sortable-table__sort-arrow">
-              <span class="sort-arrow"></span>
-            </span>
-        `);
-  }
-
   handleDocumentClick = (event) => {
     event.preventDefault();
     let elemSortable = event.target.closest('[data-id]').dataset.sortable;
