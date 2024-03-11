@@ -6,11 +6,7 @@ export default class SortableTableV1 {
     this.headerConfig = headerConfig;
     this.data = data;
     this.element = this.createElement(this.createTemplate());
-    this.subElements = {
-      body: this.element.querySelector('[data-element="body"]'),
-      header: this.element.querySelector('[data-element="header"]')
-    };
-
+    this.subElements = this.getSubElements();
   }
 
   createElement(template) {
@@ -42,6 +38,18 @@ export default class SortableTableV1 {
     `);
   }
 
+  getSubElements() {
+    const elements = this.element.querySelectorAll("[data-element]");
+
+    const accumulateSubElements = (subElements, currentElement) => {
+      subElements[currentElement.dataset.element] = currentElement;
+
+      return subElements;
+    };
+
+    return [...elements].reduce(accumulateSubElements, {});
+  }
+
   createHeaderTemplate(headerConfig) {
     return headerConfig.map(config => this.createHeaderCellTemplate(config)).join('');
   }
@@ -69,12 +77,11 @@ export default class SortableTableV1 {
 
   createRowCellTemplate(config, item) {
     if (config.template) {
-      return config.template(item);
+      return config.template(item.images);
     }
 
     const fieldName = config['id'];
     const fieldValue = item[fieldName];
-
     return `<div class="sortable-table__cell">${fieldValue}</div>`;
   }
 
