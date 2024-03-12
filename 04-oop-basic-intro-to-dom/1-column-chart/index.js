@@ -1,4 +1,4 @@
-export default class ColumnChart {
+export default class ColumnChartV1 {
   element;
   chartHeight = 50;
 
@@ -65,7 +65,7 @@ export default class ColumnChart {
       <div class="column-chart__container">
         <div data-element="header" class="column-chart__header">${this.formatHeading(this.value)}</div>
         <div data-element="body" class="column-chart__chart">
-          ${this.createChartBodyTemplate()}
+          ${this.createChartBodyTemplate(this.data)}
         </div>
       </div>
     </div>`);
@@ -73,7 +73,7 @@ export default class ColumnChart {
 
   update(newDate) {
     this.data = newDate;
-    this.element.querySelector('[data-element="body"]').innerHTML = this.createChartBodyTemplate();
+    this.element.querySelector('[data-element="body"]').innerHTML = this.createChartBodyTemplate(this.data);
   }
 
   remove() {
