@@ -1,28 +1,131 @@
-import SortableTableV2 from "../../06-events-practice/1-sortable-table-v2/index.js";
 import fetchJson from './utils/fetch-json.js';
 
 const BACKEND_URL = 'https://course-js.javascript.ru';
 const ITEMS_PER_REQUEST = 20;
-export default class SortableTable extends SortableTableV2 {
+export default class SortableTable {
   pagination = {};
+  element;
+  subElements;
 
   constructor(headersConfig, {
-    data = [], sorted = {}, url = ''
+    data = [], sorted = {}, url = '', isSortLocally = false,
   } = {}) {
-    super(headersConfig, {data, sorted});
+    this.headerConfig = headersConfig;
+    this.data = data;
+    this.element = this.createElement(this.createTemplate());
+    this.subElements = this.getSubElements();
     this.url = url;
-    this.isSortLocally = false;
+    this.sorted = sorted;
+    this.isSortLocally = isSortLocally;
     this.pagination.start = 1;
     this.pagination.end = ITEMS_PER_REQUEST + this.pagination.start;
     this.createEventListeners();
-    this.render();
+    this.render("title", "desc");
+
+  }
+
+  createElement(template) {
+    const element = document.createElement('div');
+    element.innerHTML = template;
+    return element.firstElementChild;
+  }
+
+
+  createTemplate() {
+    return (`
+      <div data-element="productsContainer" class="products-list__container">
+        <div class="sortable-table">
+          <div data-element="header" class="sortable-table__header sortable-table__row">
+              ${this.createHeaderTemplate(this.headerConfig)}
+          </div>
+          <div data-element="body" class="sortable-table__body">
+              ${this.createBodyTemplate(this.headerConfig, this.data)}
+          </div>
+          <div data-element="loading" class="loading-line sortable-table__loading-line"></div>
+          <div data-element="emptyPlaceholder" class="sortable-table__empty-placeholder">
+            <div>
+              <p>No products satisfies your filter criteria</p>
+              <button type="button" class="button-primary-outline">Reset all filters</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `);
+  }
+
+  getSubElements() {
+    const elements = this.element.querySelectorAll("[data-element]");
+
+    const accumulateSubElements = (subElements, currentElement) => {
+      subElements[currentElement.dataset.element] = currentElement;
+
+      return subElements;
+    };
+
+    return [...elements].reduce(accumulateSubElements, {});
+  }
+
+  createHeaderTemplate(headerConfig) {
+    return headerConfig.map(config => this.createHeaderCellTemplate(config)).join('');
+  }
+
+  createHeaderCellTemplate(config) {
+    return `
+      <div class="sortable-table__cell" data-id="${config.id}" data-sortable="${config.sortable}" data-order="">
+        <span>${config.title}</span>
+        <span data-element="arrow" class="sortable-table__sort-arrow">
+          <span class="sort-arrow"></span>
+        </span>
+      </div>`;
+  }
+
+  createBodyTemplate(headerConfig, dataItems) {
+    return dataItems.map(item => this.createRowTemplate(headerConfig, item)).join('');
+  }
+
+  createRowTemplate(headerConfig, item) {
+    return `
+       <a href="/products/3d-ochki-epson-elpgs03" class="sortable-table__row">
+       ${headerConfig.map(config => this.createRowCellTemplate(config, item)).join('')}
+      </a>`;
+  }
+
+  createRowCellTemplate(config, item) {
+    if (config.template) {
+      return config.template(item.images);
+    }
+
+    const fieldName = config['id'];
+    const fieldValue = item[fieldName];
+    return `<div class="sortable-table__cell">${fieldValue}</div>`;
+  }
+
+
+  sort(fieldValue = 'title', orderValue = 'desc', data) {
+    const orders = {
+      'desc': 1,
+      'asc': -1,
+    };
+
+    const sortedData = [...this.data].sort((itemA, itemB) => {
+      const k = orders[orderValue];
+      const valueA = itemA[fieldValue];
+      const valueB = itemB[fieldValue];
+      if (typeof valueA === 'string') {
+        return k * valueB.localeCompare(valueA, 'ru-en', {caseFirst: 'upper'});
+      }
+
+      return k * (valueB - valueA);
+    });
+
+    let sortElem = document.querySelector(`[data-id = ${fieldValue}]`);
+    sortElem.dataset.order = orderValue;
+    this.subElements.body.innerHTML = this.createBodyTemplate(this.headerConfig, sortedData);
   }
 
   createRequestURL(id, order) {
     const url = new URL(this.url, BACKEND_URL);
-    /*
-      Запросы на сервер: Все параметры API можно получить на странице демо-версии проекта https://course-js.javascript.ru/ проинспектировав «сетевые запросы» (в «Google Chrome» это вкладка «Network» в консоли разработчика)
-    */
+
     const {
       pagination: {start, end},
       fieldValue = id,
@@ -40,11 +143,14 @@ export default class SortableTable extends SortableTableV2 {
   }
 
   async loadData(id, order) {
-    const url = this.createRequestURL(id, order);
-    this.showLoader(true);
-    const data = await fetchJson(url);
-    this.showLoader(false);
-    return data;
+    if (this.url) {
+      const url = this.createRequestURL(id, order);
+      this.showLoader(true);
+      const data = await fetchJson(url);
+      this.showLoader(false);
+      return data;
+    }
+    return this.data;
   }
 
   showLoader(status) {
@@ -53,7 +159,9 @@ export default class SortableTable extends SortableTableV2 {
   }
 
   async sortOnClient(id, order) {
-    super.sortOnClient(id, order);
+    this.data = await this.loadData();
+   this.subElements.body.innerHTML = this.createBodyTemplate(this.headerConfig, this.data);
+    this.sort(id, order, this.data);
     this.pagination.end += ITEMS_PER_REQUEST;
   }
 
@@ -69,8 +177,24 @@ export default class SortableTable extends SortableTableV2 {
   }
 
   createEventListeners() {
-    super.createEventListeners();
+    document.addEventListener('pointerdown', this.handleDocumentClick);
     window.addEventListener("scroll", this.handleBodyScroll);
+  }
+
+  handleDocumentClick = (event) => {
+    event.preventDefault();
+    let elemSortable = event.target.closest('[data-id]').dataset.sortable;
+    let elemId = event.target.closest('[data-id]').dataset.id;
+
+
+    if (elemSortable === "true") {
+      this.sorted = {
+        id: elemId,
+        order: this.sorted.order === 'desc' ? 'asc' : 'desc',
+      };
+      this.render(this.sorted.id, this.sorted.order);
+
+    }
   }
 
   handleBodyScroll = (event) => {
@@ -88,13 +212,20 @@ export default class SortableTable extends SortableTableV2 {
     }
   }
 
-  async render(id = 'title', order = "asc") {
-    super.render(id, order);
+  async render(id = this.headerConfig.find((item) => item.sortable).id, order = "desc") {
+    if (this.isSortLocally === true) {
+      await this.sortOnClient(id, order);
+    } else {
+      await this.sortOnServer(id, order);
+    }
+  }
 
+  remove() {
+    this.element.remove();
   }
 
   destroy() {
-    super.destroy();
+    this.remove();
     window.removeEventListener("scroll", this.handleBodyScroll);
   }
 }
