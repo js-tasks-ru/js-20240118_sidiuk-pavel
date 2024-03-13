@@ -101,7 +101,7 @@ export default class SortableTable {
   }
 
 
-  sort(fieldValue = 'title', orderValue = 'desc', data) {
+  sort(fieldValue = 'title', orderValue = 'desc') {
     const orders = {
       'desc': 1,
       'asc': -1,
@@ -142,7 +142,7 @@ export default class SortableTable {
     return url;
   }
 
-  async loadData(id, order) {
+  async loadData(id, order,) {
     if (this.url) {
       const url = this.createRequestURL(id, order);
       this.showLoader(true);
@@ -160,9 +160,10 @@ export default class SortableTable {
 
   async sortOnClient(id, order) {
     this.data = await this.loadData();
-   this.subElements.body.innerHTML = this.createBodyTemplate(this.headerConfig, this.data);
+    this.subElements.body.innerHTML = this.createBodyTemplate(this.headerConfig, this.data);
     this.sort(id, order, this.data);
     this.pagination.end += ITEMS_PER_REQUEST;
+
   }
 
 
