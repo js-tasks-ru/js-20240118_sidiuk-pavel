@@ -20,7 +20,7 @@ export default class SortableTable {
     this.pagination.start = 1;
     this.pagination.end = ITEMS_PER_REQUEST + this.pagination.start;
     this.createEventListeners();
-    this.render("title", "desc");
+    this.render();
 
   }
 
@@ -208,12 +208,11 @@ export default class SortableTable {
     if (currentScrollPosition >= totalScrollHeight) {
       if (this.subElements.loading.style.display !== "block") {
         this.render();
-
       }
     }
   }
 
-  async render(id = this.headerConfig.find((item) => item.sortable).id, order = "desc") {
+  async render(id = this.headerConfig.find((item) => item.sortable).id, order = "asc") {
     if (this.isSortLocally === true) {
       await this.sortOnClient(id, order);
     } else {
