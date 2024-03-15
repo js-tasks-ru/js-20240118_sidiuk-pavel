@@ -178,8 +178,13 @@ export default class SortableTable {
   }
 
   createEventListeners() {
-    document.addEventListener('pointerdown', this.handleDocumentClick);
+    this.subElements.header.addEventListener('pointerdown', this.handleDocumentClick);
     window.addEventListener("scroll", this.handleBodyScroll);
+  }
+
+  removeEventListeners() {
+    //this.subElements.header.removeEventListeners('pointerdown', this.handleDocumentClick); если удаляю то падают все тесты
+    window.removeEventListener("scroll", this.handleBodyScroll);
   }
 
   handleDocumentClick = (event) => {
@@ -226,6 +231,6 @@ export default class SortableTable {
 
   destroy() {
     this.remove();
-    window.removeEventListener("scroll", this.handleBodyScroll);
+    this.removeEventListeners();
   }
 }
