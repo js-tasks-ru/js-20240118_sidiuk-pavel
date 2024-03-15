@@ -32,7 +32,7 @@ export default class SortableTable extends SortableTableV1 {
         order: this.sorted.order === 'desc' ? 'asc' : 'desc',
       };
       this.sort(this.sorted.id, this.sorted.order);
-      console.log(this.sorted);
+
     }
   }
 
@@ -41,5 +41,3 @@ export default class SortableTable extends SortableTableV1 {
     document.removeEventListener('pointerdown', this.handleDocumentClick);
   }
 }
-
-
